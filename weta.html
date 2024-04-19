@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #561C24, #7B4B4C, #9F7A74, #C4A99C, #E8D8C4);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #fff;
+        }
+        button{
+           
+            width: 10%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #E8D8C4;
+            color: #333;
+            border: 1px solid #333;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+        }
+        i.wrapper {
+  background-color: #FFF;
+  border-radius: 2px;
+  box-shadow: 0px 2px 1px 0px #DDD;
+  box-sizing: border-box;
+  height: 300px;
+  left: 50%;
+  margin: -150px 0 0 -150px;
+  position: absolute;
+  top: 50%;
+  width: 300px;
+}
+
+.input {
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid #561C24;
+  color: black;
+  box-sizing: border-box;
+  font-family: 'Arvo';
+  font-size: 18px;
+  height: 50px;
+  left: 50%;
+  margin: -25px 0 0 -100px;
+  padding: 10px 0px;
+  position: relative;
+  top: 50%;
+  width: 200px;
+
+  &:focus {
+    outline: none;    
+  }
+}
+
+input::-webkit-input-placeholder {
+  color: #561C24;
+}
+
+input:focus::-webkit-input-placeholder {
+  color:  #561C24;
+}
+
+.input:focus+.underline {
+  transform: scale(1);
+}
+
+
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Weather Forecast</h1>
+    <div class="wrapper">
+        <input class="input" placeholder="Please Enter City name" id="city" type="text" >
+        <span class="underline"></span>
+    </div>
+
+
+    <br><br>
+    <button onclick="getWeather()">Get Forecast</button>
+
+    <div id="weatherInfo"></div>
+
+    <script>
+        function getWeather() {
+            const apiKey = 'a6414821a0dc0772d52a3dca3ffe3c34'; 
+            const city = document.getElementById('city').value;
+
+            if (!city) {
+                alert('Please enter a city name.');
+                return;
+            }
+
+            const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    displayWeather(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching weather data:', error);
+                    alert('Error fetching weather data. Please try again later.');
+                });
+        }
+
+        function displayWeather(data) {
+            const weatherInfoDiv = document.getElementById('weatherInfo');
+
+            if (data.cod !== '404') {
+                const cityName = data.city.name;
+                const forecastList = data.list;
+
+                let output = `<p>City: ${cityName}</p>
+                              <table>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Temperature (°C)</th>
+                                    <th>Weather</th>
+                                </tr>`;
+
+                for (const forecast of forecastList) {
+                    const date = new Date(forecast.dt * 1000); // Convert timestamp to date
+                    const time = `${date.getHours()}:${(date.getMinutes() < 10 ? '0' : '') + date.getMinutes()}`;
+                    const temperature = (forecast.main.temp - 273.15).toFixed(2); // Convert to Celsius
+                    const weatherDescription = forecast.weather[0].description;
+
+                    output += `<tr>
+                                    <td>${date.toDateString()}</td>
+                                    <td>${time}</td>
+                                    <td>${temperature}</td>
+                                    <td>${weatherDescription}</td>
+                                </tr>`;
+                }
+
+                output += `</table>`;
+                weatherInfoDiv.innerHTML = output;
+            } else {
+                weatherInfoDiv.innerHTML = `<p>City not found. Please check the city name.</p>`;
+            }
+        }
+    </script>
+
+</body>
+</html>
